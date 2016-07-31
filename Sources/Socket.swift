@@ -316,37 +316,37 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Protocol Family
 		///
-		public private(set) var protocolFamily: ProtocolFamily
+		public internal(set) var protocolFamily: ProtocolFamily
 		
 		///
 		/// Socket Type
 		///
-		public private(set) var socketType: SocketType
+		public internal(set) var socketType: SocketType
 		
 		///
 		/// Socket Protocol
 		///
-		public private(set) var proto: SocketProtocol
+		public internal(set) var proto: SocketProtocol
 		
 		///
 		/// Host name for connection
 		///
-		public private(set) var hostname: String? = Socket.NO_HOSTNAME
+		public internal(set) var hostname: String? = Socket.NO_HOSTNAME
 		
 		///
 		/// Port for connection
 		///
-		public private(set) var port: Int32 = Socket.SOCKET_INVALID_PORT
+		public internal(set) var port: Int32 = Socket.SOCKET_INVALID_PORT
 		
 		///
 		/// Address info for socket.
 		///
-		public private(set) var address: Address? = nil
+		public internal(set) var address: Address? = nil
 		
 		///
 		/// Flag to indicate whether `Socket` is secure or not.
 		///
-		public private(set) var isSecure: Bool = false
+		public internal(set) var isSecure: Bool = false
 		
 		///
 		/// Returns a string description of the error.
@@ -429,7 +429,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// - Returns: New Signature instance
 		///
-		private init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?, hostname: String?, port: Int32?) throws {
+		internal init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?, hostname: String?, port: Int32?) throws {
 			
 			// This constructor requires all items be present...
 			guard let family = ProtocolFamily.getFamily(forValue: protocolFamily),
@@ -1029,7 +1029,7 @@ public class Socket: SocketReader, SocketWriter {
 				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
 				#if os(Linux)
-					let fd = withUnsafeMutablePointer(&acceptAddr) {
+					let fd = withUnsafeMutablePointer<sockaddr>(&acceptAddr) {
 						Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
 					}
 				#else
@@ -2082,7 +2082,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func write(from string: String) throws {
 		
-		try string.nulTerminatedUTF8.withUnsafeBufferPointer() {
+		try string.utf8CString.withUnsafeBufferPointer() {
 			
 			// The count returned by nullTerminatedUTF8 includes the null terminator...
 			try self.write(from: $0.baseAddress!, bufSize: $0.count-1)
